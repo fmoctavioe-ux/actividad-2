@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { CharacterBrowser } from '$lib/features/character-browser';
+	import { base } from '$app/paths';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
@@ -13,7 +14,7 @@
 			params.set('q', trimmed);
 		}
 
-		const target = params.toString() ? `/?${params.toString()}` : '/';
+		const target = params.toString() ? `${base}/?${params.toString()}` : `${base}/`;
 		goto(target, { replaceState: true, noScroll: true });
 	}
 </script>
