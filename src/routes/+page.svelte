@@ -1,31 +1,32 @@
 <script lang="ts">
-    import { goto } from '$app/navigation';
+    import { goto, invalidateAll } from '$app/navigation';
+    import { page } from '$app/stores';
     import { CharacterBrowser } from '$lib/features/character-browser';
     import type { PageData } from './$types';
 
     export let data: PageData;
 
-    function updateQuery(value: string) {
+    async function updateQuery(value: string) {
         const trimmed = value.trim();
-        // Usamos la URL actual del navegador
-        const params = new URLSearchParams(window.location.search);
+        
+        // Usamos el sistema interno de rutas de SvelteKit ($page.url)
+        const url = new URL($page.url);
 
         if (trimmed) {
-            params.set('q', trimmed);
+            url.searchParams.set('q', trimmed);
         } else {
-            params.delete('q');
+            url.searchParams.delete('q');
         }
 
-        // Construimos la nueva ruta
-        const query = params.toString() ? `?${params.toString()}` : '';
-        
-        // window.location.pathname asegura que nos quedemos en /actividad-2/
-        // keepFocus y replaceState evitan que se pierda el cursor o se llene el historial
-        goto(`${window.location.pathname}${query}`, { 
+        // 1. Actualizamos la URL sin salir de tu proyecto (/actividad-2/)
+        await goto(url.pathname + url.search, { 
             replaceState: true, 
             keepFocus: true, 
             noScroll: true 
         });
+
+        // 2. ¡El toque mágico! Forzamos a que la página vuelva a cargar los personajes
+        await invalidateAll();
     }
 </script>
 
