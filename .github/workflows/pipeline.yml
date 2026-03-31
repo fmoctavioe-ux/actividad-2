@@ -1,0 +1,52 @@
+name: CI/CD Pipeline para GitHub Pages
+
+# 1. ¿Cuándo se activa esto? 
+# Se ejecuta cada vez que alguien haga un 'push' a la rama main
+on:
+  push:
+    branches:
+      - main
+
+# 2. Permisos necesarios para que GitHub Actions pueda publicar la página
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 3. Los trabajos (Jobs) que vamos a ejecutar
+jobs:
+  # --- ETAPA 1: BUILD (Construcción e instalación) ---
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Traer el código del repositorio
+        uses: actions/checkout@v4
+      
+      - name: Configurar Node.js (Entorno de desarrollo)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          
+      - name: Instalación de dependencias
+        run: npm install
+        
+      - name: Construir el proyecto
+        run: npm run build
+        
+      - name: Preparar los archivos para la siguiente etapa
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Aquí le indicamos que tome la carpeta 'build' que genera SvelteKit
+          path: 'build' 
+
+  # --- ETAPA 2: DEPLOY (Publicación) ---
+  deploy:
+    needs: build # Asegura que no se publique nada si la etapa de "build" falla
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Desplegar a GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
