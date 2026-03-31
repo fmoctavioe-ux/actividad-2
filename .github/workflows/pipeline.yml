@@ -33,10 +33,12 @@ jobs:
       - name: Construir el proyecto
         run: npm run build
         
+      - name: Evitar que GitHub Pages ignore los archivos de Svelte
+        run: touch build/.nojekyll
+        
       - name: Preparar los archivos para la siguiente etapa
         uses: actions/upload-pages-artifact@v3
         with:
-          # Aquí le indicamos que tome la carpeta 'build' que genera SvelteKit
           path: 'build' 
 
   # --- ETAPA 2: DEPLOY (Publicación) ---
